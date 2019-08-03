@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using AutoMapper;
 using GAP.Insurance.Common.Attributes;
 using GAP.Insurance.Common.Infrastructure;
 using GAP.Insurance.Domain;
+using GAP.Insurance.TO;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -44,6 +46,18 @@ namespace GAP.Insurance.API
             //The context options could be singleton, not the context instance because each request has a scoped lifetime - atomic transactions
             var contextOptions = new DbContextOptionsBuilder<DBInsuranceContext>().UseSqlServer(Configuration.GetConnectionString("InsuranceDatabase")).Options;
             services.AddSingleton(contextOptions);
+
+            //Mapping configuration is singleton too
+            var mapperConfiguration = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<Insurance.Domain.Insurance, InsuranceTO>();
+                cfg.CreateMap<Insurance.Domain.Customer, CustomerTO>();
+                cfg.CreateMap<Insurance.Domain.CustomerInsurance, CustomerInsuranceTO>();
+                cfg.CreateMap<InsuranceTO, Insurance.Domain.Insurance>();
+                cfg.CreateMap<CustomerTO, Insurance.Domain.Customer>();
+                cfg.CreateMap<CustomerInsuranceTO, Insurance.Domain.CustomerInsurance>();
+            });
+            services.AddSingleton(mapperConfiguration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
