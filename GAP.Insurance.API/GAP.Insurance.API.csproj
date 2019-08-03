@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GAP.Insurance.Common\GAP.Insurance.Common.csproj" />
     <ProjectReference Include="..\GAP.Insurance.Domain\GAP.Insurance.Domain.csproj" />
   </ItemGroup>
 

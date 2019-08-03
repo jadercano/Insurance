@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using GAP.Insurance.Common.Attributes;
+using GAP.Insurance.Common.Infrastructure;
 using GAP.Insurance.Domain;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,7 +30,16 @@ namespace GAP.Insurance.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(typeof(CustomActionFilterAttribute));
+                options.Filters.Add(typeof(CustomExceptionFilterAttribute));
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // Register application services.
+            Assembly currentExecutingAssembly = Assembly.GetExecutingAssembly();
+            services.AddSingleton<ILocalizationService>(new LocalizationService(currentExecutingAssembly.GetName().Name + ".Resources.Messages", currentExecutingAssembly));
+            services.AddSingleton<ILoggerService, LoggerService>();
 
             //The context options could be singleton, not the context instance because each request has a scoped lifetime - atomic transactions
             var contextOptions = new DbContextOptionsBuilder<DBInsuranceContext>().UseSqlServer(Configuration.GetConnectionString("InsuranceDatabase")).Options;
