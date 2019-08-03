@@ -18,11 +18,11 @@ namespace GAP.Insurance.Core.InsuranceModule
     public class InsuranceRepository : IInsuranceRepository
     {
         DbContextOptions<DBInsuranceContext> _contextOptions;
-        IMapper _mapper; //Allows to map entities between model and transfer objects
+        IMapper _mapper;
         ILocalizationService _localizer;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="SampleRepository"/> class
+        /// Creates a new instance of the <see cref="InsuranceRepository"/> class
         /// </summary>
         /// <param name="contextOptions">Context options injected by DI engine</param>
         /// <param name="mapperConfiguration">Mapper configuration injected by DI engince</param>

@@ -27,13 +27,13 @@ namespace GAP.Insurance.Core.InsuranceModule
         /// <summary>
         /// Allows to save a Insurance entity
         /// </summary>
-        /// <param name="sample">The sample entity to be saved</param>
-        void Save(InsuranceTO sampleTO);
+        /// <param name="insurance">The insurance entity to be saved</param>
+        void Save(InsuranceTO insuranceTO);
 
         /// <summary>
         /// Allows to delete a Insurance entity
         /// </summary>
-        /// <param name="id">The identifier of the sample entity to delete</param>
+        /// <param name="id">The identifier of the insurance entity to delete</param>
         void Delete(string id);
     }
 }
