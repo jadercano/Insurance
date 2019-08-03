@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace GAP.Insurance.TO
@@ -12,11 +14,13 @@ namespace GAP.Insurance.TO
         /// <summary>
         /// Customer Id
         /// </summary>
-        public string CustomerId { get; set; }
+        public Guid CustomerId { get; set; }
 
         /// <summary>
         /// Customer name
         /// </summary>
+        [Column(TypeName = "varchar(50)")]
+        [Required]
         public string Name { get; set; }
 
         /// <summary>

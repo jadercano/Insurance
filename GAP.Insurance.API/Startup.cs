@@ -9,6 +9,8 @@ using AutoMapper;
 using GAP.Insurance.Common.Attributes;
 using GAP.Insurance.Common.Helpers;
 using GAP.Insurance.Common.Infrastructure;
+using GAP.Insurance.Core.CustomerModule;
+using GAP.Insurance.Core.InsuranceModule;
 using GAP.Insurance.Domain;
 using GAP.Insurance.TO;
 using log4net.Repository;
@@ -50,6 +52,8 @@ namespace GAP.Insurance.API
             //The context options could be singleton, not the context instance because each request has a scoped lifetime - atomic transactions
             var contextOptions = new DbContextOptionsBuilder<DBInsuranceContext>().UseSqlServer(Configuration.GetConnectionString("InsuranceDatabase")).Options;
             services.AddSingleton(contextOptions);
+            services.AddSingleton(typeof(ICustomerRepository), typeof(CustomerRepository));
+            services.AddSingleton(typeof(IInsuranceRepository), typeof(InsuranceRepository));
 
             //Mapping configuration is singleton too
             var mapperConfiguration = new MapperConfiguration(cfg =>

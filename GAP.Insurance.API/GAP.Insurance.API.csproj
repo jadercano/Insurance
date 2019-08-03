@@ -11,10 +11,12 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.2.6" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.6" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GAP.Insurance.Common\GAP.Insurance.Common.csproj" />
+    <ProjectReference Include="..\GAP.Insurance.Core\GAP.Insurance.Core.csproj" />
     <ProjectReference Include="..\GAP.Insurance.Domain\GAP.Insurance.Domain.csproj" />
   </ItemGroup>
 

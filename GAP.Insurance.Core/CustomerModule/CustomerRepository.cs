@@ -35,7 +35,7 @@ namespace GAP.Insurance.Core.CustomerModule
         }
 
         /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.Delete(string)"/>
-        public async void Delete(string id)
+        public async Task Delete(Guid id)
         {
             //Validate argument
             var guid = ValidateId(id);
@@ -54,71 +54,72 @@ namespace GAP.Insurance.Core.CustomerModule
         /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.GetAll"/>
         public async Task<List<CustomerTO>> GetAll()
         {
-            List<CustomerTO> insurancesTO = null;
+            List<CustomerTO> customersTO = null;
 
             using (var context = new DBInsuranceContext(_contextOptions))
             {
                 var customers = await context.Customer.ToListAsync();
-                insurancesTO = _mapper.Map<List<CustomerTO>>(customers.OrderBy(s => s.Name));
+                customersTO = _mapper.Map<List<CustomerTO>>(customers.OrderBy(s => s.Name));
             }
 
-            return insurancesTO;
+            return customersTO;
         }
 
         /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.GetById(string)"/>
-        public async Task<CustomerTO> GetById(string id)
+        public async Task<CustomerTO> GetById(Guid id)
         {
             //Validate argument
-            var guid = ValidateId(id);
+            ValidateId(id);
 
-            CustomerTO insuranceTO = null;
+            CustomerTO customerTO = null;
             using (var context = new DBInsuranceContext(_contextOptions))
             {
-                var customer = await context.Customer.Where(s => s.CustomerId == guid).FirstOrDefaultAsync();
+                var customer = await context.Customer.Where(s => s.CustomerId == id).FirstOrDefaultAsync();
 
                 if (customer != null)
                 {
-                    insuranceTO = _mapper.Map<CustomerTO>(customer);
+                    customerTO = _mapper.Map<CustomerTO>(customer);
                 }
             }
 
-            return insuranceTO;
+            return customerTO;
         }
 
         /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.Save(CustomerTO)"/>
-        public async void Save(CustomerTO insuranceTO)
+        public async Task<CustomerTO> Save(CustomerTO customerTO)
         {
-            if (insuranceTO == null)
-                throw new ArgumentNullException("insuranceTO");
+            Validate(customerTO);
 
             using (var context = new DBInsuranceContext(_contextOptions))
             {
                 //Validate if is an insert or an update
-                if (string.IsNullOrWhiteSpace(insuranceTO.CustomerId))
+                if (customerTO.CustomerId == Guid.Empty)
                 {
-                    Domain.Customer insurance = _mapper.Map<Domain.Customer>(insuranceTO);
+                    customerTO.CustomerId = Guid.NewGuid();
+                    Domain.Customer insurance = _mapper.Map<Domain.Customer>(customerTO);
                     context.Customer.Add(insurance);
                 }
                 else
                 {
-                    var guid = ValidateId(insuranceTO.CustomerId);
+                    var guid = ValidateId(customerTO.CustomerId);
                     var customer = await context.Customer.Where(s => s.CustomerId == guid).FirstOrDefaultAsync();
 
                     if (customer == null)
                     {
-                        throw new CustomException(_localizer.GetMessage("ERROR_EntityNotFound", insuranceTO.CustomerId));
+                        throw new CustomException(_localizer.GetMessage("ERROR_EntityNotFound", customerTO.CustomerId));
                     }
 
-                    customer.Name = insuranceTO.Name;
-                    customer.Email = insuranceTO.Email;
+                    customer.Name = customerTO.Name;
+                    customer.Email = customerTO.Email;
                 }
 
                 await context.SaveChangesAsync();
             }
+            return customerTO;
         }
 
         /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.AssignInsurances(List{InsuranceTO})"/>
-        public async void AssignInsurances(List<InsuranceTO> insurancesTO)
+        public async Task AssignInsurances(List<InsuranceTO> insurancesTO)
         {
             if (insurancesTO == null)
                 throw new ArgumentNullException("insuranceTO");
@@ -130,7 +131,7 @@ namespace GAP.Insurance.Core.CustomerModule
         }
 
         /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.CancelInsurances(List{InsuranceTO})"/>
-        public async void CancelInsurances(List<InsuranceTO> insurancesTO)
+        public async Task CancelInsurances(List<InsuranceTO> insurancesTO)
         {
             if (insurancesTO == null)
                 throw new ArgumentNullException("insuranceTO");
@@ -141,14 +142,38 @@ namespace GAP.Insurance.Core.CustomerModule
             }
         }
 
-        private Guid ValidateId(string id)
+        private Guid ValidateId(Guid id)
         {
             var guid = Guid.Empty;
-            if (!Guid.TryParse(id, out guid))
+            if (id == Guid.Empty)
             {
                 throw new CustomException(_localizer.GetMessage("ERROR_EntityNotFound", id));
             }
             return guid;
+        }
+
+        private void Validate(CustomerTO customerTO)
+        {
+            if (customerTO == null)
+            {
+                throw new ArgumentNullException(nameof(customerTO));
+            }
+
+            //Validate name
+            if (string.IsNullOrWhiteSpace(customerTO.Name))
+            {
+                throw new ArgumentNullException(nameof(customerTO.Name));
+            }
+            else if (customerTO.Name.Length > 50)
+            {
+                throw new InvalidOperationException(_localizer.GetMessage("Customer_Validate_Name"));
+            }
+
+            //Validate email
+            if (string.IsNullOrWhiteSpace(customerTO.Email))
+            {
+                throw new ArgumentNullException(nameof(customerTO.Email));
+            }
         }
     }
 }
