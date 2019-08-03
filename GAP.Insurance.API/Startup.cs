@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Xml;
 using AutoMapper;
 using GAP.Insurance.Common.Attributes;
+using GAP.Insurance.Common.Helpers;
 using GAP.Insurance.Common.Infrastructure;
 using GAP.Insurance.Domain;
 using GAP.Insurance.TO;
+using log4net.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -61,8 +65,10 @@ namespace GAP.Insurance.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerService logger)
         {
+            InitializeLog4Net(logger);
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -75,6 +81,23 @@ namespace GAP.Insurance.API
 
             app.UseHttpsRedirection();
             app.UseMvc();
+        }
+
+        /// <summary>
+        /// Allows to initialize log4net
+        /// </summary>
+        /// <param name="logger">The logger to be used</param>
+        private void InitializeLog4Net(ILoggerService logger)
+        {
+            var log4NetConfig = new XmlDocument();
+            log4NetConfig.Load(File.OpenRead("log4net.config"));
+
+            ILoggerRepository repo = log4net.LogManager.CreateRepository(
+                Assembly.GetEntryAssembly(), typeof(log4net.Repository.Hierarchy.Hierarchy));
+
+            log4net.Config.XmlConfigurator.Configure(repo, log4NetConfig["log4net"]);
+
+            logger.WriteLog(LogCategory.Debug, "INFO_Log4NetStarted", true, null, null);
         }
     }
 }
