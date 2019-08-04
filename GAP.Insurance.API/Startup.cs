@@ -44,6 +44,16 @@ namespace GAP.Insurance.API
                 options.Filters.Add(typeof(CustomExceptionFilterAttribute));
             }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
+            // Enable CORS
+            services.AddCors(options =>
+            {
+                options.AddPolicy("CorsPolicy",
+                    builder => builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials());
+            });
+
             // Register application services.
             Assembly currentExecutingAssembly = Assembly.GetExecutingAssembly();
             services.AddSingleton<ILocalizationService>(new LocalizationService(currentExecutingAssembly.GetName().Name + ".Resources.Messages", currentExecutingAssembly));
@@ -83,6 +93,7 @@ namespace GAP.Insurance.API
                 app.UseHsts();
             }
 
+            app.UseCors("CorsPolicy");
             app.UseHttpsRedirection();
             app.UseMvc();
         }
