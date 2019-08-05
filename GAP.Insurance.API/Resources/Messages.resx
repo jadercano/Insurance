@@ -126,6 +126,9 @@
   <data name="ERROR_UnhandledException" xml:space="preserve">
     <value>An unhandled exception was thrown by the application during the execution of the action {0} in the controller {1}. Please verify technical log or contact the system administrator.</value>
   </data>
+  <data name="ERROR_UnhandledExceptionMessage" xml:space="preserve">
+    <value>An error has ocurred. Please verify technical log or contact the system administrator.</value>
+  </data>
   <data name="INFO_EndActionCall" xml:space="preserve">
     <value>Ends the execution of the action {0} in the controller {1}. Date: {2} {3}</value>
   </data>
@@ -134,5 +137,8 @@
   </data>
   <data name="INFO_StartActionCall" xml:space="preserve">
     <value>Starts the execution of the action {0} in the controller {1}. Date: {2} {3}</value>
+  </data>
+  <data name="Insurance_Validate_RiskType_Coverage" xml:space="preserve">
+    <value>Coverage can't be greater than 50 when the insurance has a high risk type.</value>
   </data>
 </root>

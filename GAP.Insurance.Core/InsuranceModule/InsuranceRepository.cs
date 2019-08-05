@@ -35,14 +35,14 @@ namespace GAP.Insurance.Core.InsuranceModule
         }
 
         /// <see cref="GAP.Insurance.Core.InsuranceModule.IInsuranceRepository.Delete(string)"/>
-        public async void Delete(string id)
+        public async Task Delete(Guid id)
         {
             //Validate argument
-            var guid = ValidateId(id);
+            ValidateId(id);
 
             using (var context = new DBInsuranceContext(_contextOptions))
             {
-                var insurance = await context.Insurance.Where(s => s.InsuranceId == guid).FirstOrDefaultAsync();
+                var insurance = await context.Insurance.Where(s => s.InsuranceId == id).FirstOrDefaultAsync();
                 if (insurance != null)
                 {
                     context.Remove(insurance);
@@ -66,15 +66,15 @@ namespace GAP.Insurance.Core.InsuranceModule
         }
 
         /// <see cref="GAP.Insurance.Core.InsuranceModule.IInsuranceRepository.GetById(string)"/>
-        public async Task<InsuranceTO> GetById(string id)
+        public async Task<InsuranceTO> GetById(Guid id)
         {
             //Validate argument
-            var guid = ValidateId(id);
+            ValidateId(id);
 
             InsuranceTO insuranceTO = null;
             using (var context = new DBInsuranceContext(_contextOptions))
             {
-                var insurance = await context.Insurance.Where(s => s.InsuranceId == guid).FirstOrDefaultAsync();
+                var insurance = await context.Insurance.Where(s => s.InsuranceId == id).FirstOrDefaultAsync();
 
                 if (insurance != null)
                 {
@@ -86,23 +86,23 @@ namespace GAP.Insurance.Core.InsuranceModule
         }
 
         /// <see cref="GAP.Insurance.Core.InsuranceModule.IInsuranceRepository.Save(InsuranceTO)"/>
-        public async void Save(InsuranceTO insuranceTO)
+        public async Task<InsuranceTO> Save(InsuranceTO insuranceTO)
         {
-            if (insuranceTO == null)
-                throw new ArgumentNullException("insuranceTO");
+            Validate(insuranceTO);
 
             using (var context = new DBInsuranceContext(_contextOptions))
             {
                 //Validate if is an insert or an update
-                if (string.IsNullOrWhiteSpace(insuranceTO.InsuranceId))
+                if (insuranceTO.InsuranceId == Guid.Empty)
                 {
+                    insuranceTO.InsuranceId = Guid.NewGuid();
                     Domain.Insurance insurance = _mapper.Map<Domain.Insurance>(insuranceTO);
                     context.Insurance.Add(insurance);
                 }
                 else
                 {
-                    var guid = ValidateId(insuranceTO.InsuranceId);
-                    var insurance = await context.Insurance.Where(s => s.InsuranceId == guid).FirstOrDefaultAsync();
+                    ValidateId(insuranceTO.InsuranceId);
+                    var insurance = await context.Insurance.Where(s => s.InsuranceId == insuranceTO.InsuranceId).FirstOrDefaultAsync();
 
                     if (insurance == null)
                     {
@@ -120,16 +120,63 @@ namespace GAP.Insurance.Core.InsuranceModule
 
                 await context.SaveChangesAsync();
             }
+            return insuranceTO;
         }
 
-        private Guid ValidateId(string id)
+        private void ValidateId(Guid id)
         {
-            var guid = Guid.Empty;
-            if (!Guid.TryParse(id, out guid))
+            if (id == Guid.Empty)
             {
                 throw new CustomException(_localizer.GetMessage("ERROR_EntityNotFound", id));
             }
-            return guid;
+        }
+
+        private void Validate(InsuranceTO insuranceTO)
+        {
+            if (insuranceTO == null)
+            {
+                throw new ArgumentNullException(nameof(insuranceTO));
+            }
+
+            //Validate name
+            if (string.IsNullOrWhiteSpace(insuranceTO.Name))
+            {
+                throw new ArgumentNullException(nameof(insuranceTO.Name));
+            }
+            else if (insuranceTO.Name.Length > 50)
+            {
+                throw new InvalidOperationException(_localizer.GetMessage("Customer_Validate_Name"));
+            }
+
+            //Validate start date
+            if (insuranceTO.StartDate == default(DateTime))
+            {
+                throw new ArgumentNullException(nameof(insuranceTO.StartDate));
+            }
+
+            //Validate end date
+            if (insuranceTO.EndDate == default(DateTime))
+            {
+                throw new ArgumentNullException(nameof(insuranceTO.EndDate));
+            }
+
+            //Validate coverage type
+            if (string.IsNullOrWhiteSpace(insuranceTO.CoverageType))
+            {
+                throw new ArgumentNullException(nameof(insuranceTO.CoverageType));
+            }
+
+            //Validate risk type
+            if (string.IsNullOrWhiteSpace(insuranceTO.RiskType))
+            {
+                throw new ArgumentNullException(nameof(insuranceTO.RiskType));
+            }
+
+            //Validate risk type and coverage
+            if (insuranceTO.RiskType.Equals("High") && insuranceTO.Coverage > 50)
+            {
+                throw new CustomException(_localizer.GetMessage("Insurance_Validate_RiskType_Coverage"));
+            }
         }
     }
 }

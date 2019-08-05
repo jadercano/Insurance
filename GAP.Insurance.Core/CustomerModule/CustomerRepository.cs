@@ -38,11 +38,11 @@ namespace GAP.Insurance.Core.CustomerModule
         public async Task Delete(Guid id)
         {
             //Validate argument
-            var guid = ValidateId(id);
+            ValidateId(id);
 
             using (var context = new DBInsuranceContext(_contextOptions))
             {
-                var customer = await context.Customer.Where(s => s.CustomerId == guid).FirstOrDefaultAsync();
+                var customer = await context.Customer.Where(s => s.CustomerId == id).FirstOrDefaultAsync();
                 if (customer != null)
                 {
                     context.Remove(customer);
@@ -101,8 +101,8 @@ namespace GAP.Insurance.Core.CustomerModule
                 }
                 else
                 {
-                    var guid = ValidateId(customerTO.CustomerId);
-                    var customer = await context.Customer.Where(s => s.CustomerId == guid).FirstOrDefaultAsync();
+                    ValidateId(customerTO.CustomerId);
+                    var customer = await context.Customer.Where(s => s.CustomerId == customerTO.CustomerId).FirstOrDefaultAsync();
 
                     if (customer == null)
                     {
@@ -142,14 +142,12 @@ namespace GAP.Insurance.Core.CustomerModule
             }
         }
 
-        private Guid ValidateId(Guid id)
+        private void ValidateId(Guid id)
         {
-            var guid = Guid.Empty;
             if (id == Guid.Empty)
             {
                 throw new CustomException(_localizer.GetMessage("ERROR_EntityNotFound", id));
             }
-            return guid;
         }
 
         private void Validate(CustomerTO customerTO)

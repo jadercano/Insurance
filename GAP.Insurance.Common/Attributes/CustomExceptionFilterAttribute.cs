@@ -35,20 +35,21 @@ namespace GAP.Insurance.Common.Attributes
         /// <param name="context"></param>
         public override void OnException(ExceptionContext context)
         {
+            //Allows to write the error in the application log
+            _logger.WriteError(context.Exception.Message, context.Exception);
+
             var exception = context.Exception as CustomException;
 
             if (exception == null)
             {
                 //Unhandled exception
                 var controllerName = context.RouteData.Values["controller"];
-                var actionName = context.RouteData.Values["action"];
+                var actionName = context.RouteData.Values["action"];                
+                _logger.WriteLog(Helpers.LogCategory.Debug, "ERROR_UnhandledException", actionName, controllerName);
 
-                string message = _localizer.GetMessage("ERROR_UnhandledException", actionName, controllerName);
-                exception = new CustomException(message, context.Exception);
+                string userMessage = _localizer.GetMessage("ERROR_UnhandledExceptionMessage");
+                exception = new CustomException(userMessage, context.Exception);
             }
-
-            //Allows to write the error in the application log
-            _logger.WriteError(exception.Message, exception);
 
             var apiError = new APIError();
             int statusCode = (int)HttpStatusCode.InternalServerError;

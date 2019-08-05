@@ -19,13 +19,15 @@ namespace GAP.Insurance.TO
         /// <summary>
         /// Customer name
         /// </summary>
-        [Column(TypeName = "varchar(50)")]
         [Required]
+        [MaxLength(50)]
         public string Name { get; set; }
 
         /// <summary>
         /// Customer email
         /// </summary>
+        [Required]
+        [MaxLength(100)]
         public string Email { get; set; }
 
         /// <summary>

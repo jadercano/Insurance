@@ -12,7 +12,7 @@ namespace GAP.Insurance.TO
         /// <summary>
         /// Insurance Id
         /// </summary>
-        public string InsuranceId { get; set; }
+        public Guid InsuranceId { get; set; }
 
         /// <summary>
         /// Insurance name

@@ -26,29 +26,42 @@ namespace GAP.Insurance.API.Controllers
 
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<InsuranceTO>), StatusCodes.Status200OK)]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var insuranceList = _repository.GetAll();
+            var insuranceList = await _repository.GetAll();
             return Ok(insuranceList);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById(string id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetById(Guid id)
         {
-            var insurance = _repository.GetById(id);
+            var insurance = await _repository.GetById(id);
+
+            if (insurance == null)
+            {
+                return NotFound();
+            }
+
             return Ok(insurance);
         }
 
         [HttpPost]
-        public void Save([FromBody] InsuranceTO sampleTO)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<InsuranceTO> Save([FromBody] InsuranceTO insuranceTO)
         {
-            _repository.Save(sampleTO);
+            return await _repository.Save(insuranceTO);
         }
 
         [HttpDelete("{id}")]
-        public void Delete(string id)
+        public async Task Delete(Guid id)
         {
-            _repository.Delete(id);
+            await _repository.Delete(id);
         }
     }
 }

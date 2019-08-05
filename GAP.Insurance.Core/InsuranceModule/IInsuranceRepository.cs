@@ -22,18 +22,18 @@ namespace GAP.Insurance.Core.InsuranceModule
         /// </summary>
         /// <param name="id">The identifier to look for</param>
         /// <returns></returns>
-        Task<InsuranceTO> GetById(string id);
+        Task<InsuranceTO> GetById(Guid id);
 
         /// <summary>
         /// Allows to save a Insurance entity
         /// </summary>
         /// <param name="insurance">The insurance entity to be saved</param>
-        void Save(InsuranceTO insuranceTO);
+        Task<InsuranceTO> Save(InsuranceTO insuranceTO);
 
         /// <summary>
         /// Allows to delete a Insurance entity
         /// </summary>
         /// <param name="id">The identifier of the insurance entity to delete</param>
-        void Delete(string id);
+        Task Delete(Guid id);
     }
 }
