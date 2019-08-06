@@ -34,14 +34,16 @@ namespace GAP.Insurance.Core.CustomerModule
         /// <summary>
         /// Allows to assign customer insurances
         /// </summary>
+        /// <param name="id">Customer Id</param>
         /// <param name="insurancesTO">Insurances to be saved</param>
-        Task AssignInsurances(List<InsuranceTO> insurancesTO);
+        Task SaveInsurances(Guid id, List<CustomerInsuranceTO> insurancesTO);
 
         /// <summary>
         /// Allows to cancel customer insurances
         /// </summary>
+        /// <param name="id">Customer Id</param>
         /// <param name="insurancesTO">Insurance to be canceled</param>
-        Task CancelInsurances(List<InsuranceTO> insurancesTO);
+        Task CancelInsurances(Guid id, List<CustomerInsuranceTO> insurancesTO);
 
         /// <summary>
         /// Allows to delete a Insurance entity

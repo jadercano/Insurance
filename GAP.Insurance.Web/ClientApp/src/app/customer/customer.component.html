@@ -1,8 +1,9 @@
-<h1>Customers</h1>
+<h1 *ngIf="!displayDetail">Customers</h1>
+<h1 *ngIf="displayDetail">Customer insurances</h1>
 
 <p *ngIf="!customers"><em>Loading...</em></p>
 
-<p-table [columns]="cols" [value]="customers" [(selection)]="selectedCustomer" (onRowSelect)="onRowSelect($event)" [paginator]="true" [rows]="10">
+<p-table *ngIf="!displayDetail" [columns]="cols" [value]="customers" [(selection)]="selectedCustomer" (onRowSelect)="onRowSelect($event)" [paginator]="true" [rows]="10">
   <ng-template pTemplate="caption">
     List of Customers
   </ng-template>
@@ -23,7 +24,7 @@
       <td>
         <button pButton icon="fa fa-edit" (click)="edit(rowData)"></button>&nbsp;
         <button pButton icon="fa fa-trash" (click)="delete(rowData)"></button>&nbsp;
-        <button pButton icon="fa fa-bars" (click)="delete(rowData)"></button>
+        <button pButton icon="fa fa-bars" (click)="showDetail(rowData)"></button>
       </td>
     </tr>
   </ng-template>
@@ -35,27 +36,29 @@
 </p-table>
 
 <p-dialog header="Customer Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true" [style]="{width: '600px'}">
-    <div class="ui-g ui-fluid" *ngIf="customer">
-      <div class="ui-g-12">
-        <div class="ui-g-4">
-          <label for="name">Name</label>
-        </div>
-        <div class="ui-g-8">
-          <input pInputText id="name" [(ngModel)]="customer.name" required="required" maxlength="50" />
-        </div>
+  <div class="ui-g ui-fluid" *ngIf="customer">
+    <div class="ui-g-12">
+      <div class="ui-g-4">
+        <label for="name">Name</label>
       </div>
-      <div class="ui-g-12">
-        <div class="ui-g-4">
-          <label for="email">E-mail</label>
-        </div>
-        <div class="ui-g-8">
-          <input pInputText id="email" type="email" [(ngModel)]="customer.email" required="required" maxlength="100" />
-        </div>
+      <div class="ui-g-8">
+        <input pInputText id="name" [(ngModel)]="customer.name" required="required" maxlength="50" />
       </div>
     </div>
+    <div class="ui-g-12">
+      <div class="ui-g-4">
+        <label for="email">E-mail</label>
+      </div>
+      <div class="ui-g-8">
+        <input pInputText id="email" type="email" [(ngModel)]="customer.email" required="required" maxlength="100" />
+      </div>
+    </div>
+  </div>
   <p-footer>
     <div class="ui-dialog-buttonpane ui-helper-clearfix">
       <button type="submit" pButton icon="fa fa-check" (click)="save()" label="Save"></button>
     </div>
   </p-footer>
 </p-dialog>
+
+<app-customer-detail [customer]="customer" *ngIf="displayDetail"></app-customer-detail>

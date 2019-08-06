@@ -1,8 +1,11 @@
 ﻿using AutoMapper;
 using FluentAssertions;
 using GAP.Insurance.API.Controllers;
+using GAP.Insurance.Common.Attributes;
+using GAP.Insurance.Common.Exceptions;
 using GAP.Insurance.Common.Infrastructure;
 using GAP.Insurance.Core.CustomerModule;
+using GAP.Insurance.Core.InsuranceModule;
 using GAP.Insurance.Domain;
 using GAP.Insurance.TO;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,12 +26,17 @@ namespace GAP.Insurance.API.Test
     public class CustomerControllerTest
     {
         private readonly ICustomerRepository _customerRepository;
-
-        private CustomerTO _customer { get; set; }
+        private readonly IInsuranceRepository _insuranceRepository;
 
         public CustomerControllerTest()
         {
             var services = new ServiceCollection();
+
+            services.AddMvc(options =>
+            {
+                options.Filters.Add(typeof(CustomActionFilterAttribute));
+                options.Filters.Add(typeof(CustomExceptionFilterAttribute));
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             //The context options could be singleton, not the context instance because each request has a scoped lifetime - atomic transactions
             var contextOptions = new DbContextOptionsBuilder<DBInsuranceContext>().UseSqlServer("Server=tcp:jcm-group.database.windows.net,1433;Initial Catalog=DBInsurance;Persist Security Info=False;User ID=USR_INSURANCE;Password=IN$_2019;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;").Options;
@@ -37,6 +46,7 @@ namespace GAP.Insurance.API.Test
             services.AddSingleton<ILocalizationService>(new LocalizationService(currentExecutingAssembly.GetName().Name + ".Resources.Messages", currentExecutingAssembly));
             services.AddSingleton<ILoggerService, LoggerService>();
             services.AddTransient<ICustomerRepository, CustomerRepository>();
+            services.AddTransient<IInsuranceRepository, InsuranceRepository>();
 
             //Mapping configuration is singleton too
             var mapperConfiguration = new MapperConfiguration(cfg =>
@@ -52,6 +62,7 @@ namespace GAP.Insurance.API.Test
 
             var serviceProvider = services.BuildServiceProvider();
             _customerRepository = serviceProvider.GetService<ICustomerRepository>();
+            _insuranceRepository = serviceProvider.GetService<IInsuranceRepository>();
         }
 
         #region Add New Customer  
@@ -75,7 +86,7 @@ namespace GAP.Insurance.API.Test
         }
 
         [Fact]
-        public async Task Task_Add_InvalidData_Return_BadRequest()
+        public async Task Task_Add_InvalidData()
         {
             //Arrange  
             var controller = new CustomerController(_customerRepository);
@@ -85,11 +96,11 @@ namespace GAP.Insurance.API.Test
                 Email = "Test Email"
             };
 
-            //Act              
-            var data = await controller.Save(customer);
+            //Act
+            Exception ex = await Assert.ThrowsAsync<CustomException>(() => controller.Save(customer));
 
             //Assert  
-            Assert.IsType<BadRequestResult>(data);
+            Assert.Equal("Name must have less than 50 characters.", ex.Message);
         }
 
         [Fact]
@@ -115,9 +126,6 @@ namespace GAP.Insurance.API.Test
             Assert.Equal(customer.CustomerId, result.CustomerId);
             Assert.Equal(customer.Name, result.Name);
             Assert.Equal(customer.Email, result.Email);
-
-            //Set customer for other test
-            _customer = result;
         }
 
         #endregion
@@ -129,10 +137,10 @@ namespace GAP.Insurance.API.Test
         {
             //Arrange  
             var controller = new CustomerController(_customerRepository);
-            var customerId = _customer.CustomerId;
+            var customer = await GetCustomer();
 
             //Act  
-            var data = await controller.GetById(customerId);
+            var data = await controller.GetById(Guid.Parse("B80DC883-8A09-41A0-88E9-2EF689A3FC53"));
 
             //Assert  
             Assert.IsType<OkObjectResult>(data);
@@ -157,10 +165,10 @@ namespace GAP.Insurance.API.Test
         {
             //Arrange  
             var controller = new CustomerController(_customerRepository);
-            Guid customerId = _customer.CustomerId;
+            var _customer = await GetCustomer();
 
             //Act  
-            var data = await controller.GetById(customerId);
+            var data = await controller.GetById(_customer.CustomerId);
 
             //Assert  
             Assert.IsType<OkObjectResult>(data);
@@ -173,6 +181,78 @@ namespace GAP.Insurance.API.Test
             Assert.Equal(_customer.Email, customer.Email);
         }
 
+        #endregion
+
+        #region Add Insurances
+
+        [Fact]
+        public async void Task_AddInsurance_ValidData_Return_OkResult()
+        {
+            //Arrange  
+            var controller = new CustomerController(_customerRepository);
+            var customer = await GetCustomer();
+            var insurances = await GetInsurances();
+            var customerInsurances = new List<CustomerInsuranceTO>();
+
+            foreach (var insurance in insurances)
+            {
+                customerInsurances.Add(new CustomerInsuranceTO {
+                    Insurance = insurance,
+                    StartDate = DateTime.Today,
+                    EndDate = DateTime.Today.AddMonths(1)
+                });
+            }
+
+            //Act  
+            var data = await controller.SaveInsurances(customer.CustomerId, customerInsurances);
+
+            //Assert  
+            Assert.IsType<OkResult>(data);
+        }
+
+        #endregion
+
+        #region Remove Insurance
+
+        [Fact]
+        public async void Task_CancelInsurance_ValidData_Return_OkResult()
+        {
+            //Arrange  
+            var controller = new CustomerController(_customerRepository);
+            var customer = await GetCustomer();
+            var insurances = await GetInsurances();
+            var customerInsurances = new List<CustomerInsuranceTO>();
+
+            foreach (var insurance in insurances)
+            {
+                customerInsurances.Add(new CustomerInsuranceTO
+                {
+                    Insurance = insurance,
+                    StartDate = DateTime.Today,
+                    EndDate = DateTime.Today.AddMonths(1)
+                });
+            }
+
+            //Act  
+            var data = await controller.CancelInsurances(customer.CustomerId, customerInsurances);
+
+            //Assert  
+            Assert.IsType<OkResult>(data);
+        }
+
+        #endregion
+
+        #region Private methods
+        private async Task<CustomerTO> GetCustomer()
+        {
+            var list = await _customerRepository.GetAll();
+            return list?.FirstOrDefault();
+        }
+        private async Task<List<InsuranceTO>> GetInsurances()
+        {
+            var list = await _insuranceRepository.GetAll();
+            return list;
+        }
         #endregion
     }
 }

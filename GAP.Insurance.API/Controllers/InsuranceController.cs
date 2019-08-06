@@ -53,9 +53,10 @@ namespace GAP.Insurance.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<InsuranceTO> Save([FromBody] InsuranceTO insuranceTO)
+        public async Task<IActionResult> Save([FromBody] InsuranceTO insuranceTO)
         {
-            return await _repository.Save(insuranceTO);
+            var insurance = await _repository.Save(insuranceTO);
+            return Ok(insurance);
         }
 
         [HttpDelete("{id}")]

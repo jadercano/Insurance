@@ -41,6 +41,12 @@ namespace GAP.Insurance.API.Controllers
         public async Task<IActionResult> GetById(Guid id)
         {
             var customer = await _repository.GetById(id);
+
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
             return Ok(customer);
         }
 
@@ -62,6 +68,24 @@ namespace GAP.Insurance.API.Controllers
         public async Task Delete(Guid id)
         {
             await _repository.Delete(id);
+        }
+        
+        [HttpPost("saveInsurances/{id}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SaveInsurances(Guid id, [FromBody] List<CustomerInsuranceTO> customerInsurances)
+        {
+            await _repository.SaveInsurances(id, customerInsurances);
+            return Ok();
+        }
+
+        [HttpPost("cancelInsurances/{id}")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CancelInsurances(Guid id, [FromBody] List<CustomerInsuranceTO> customerInsurances)
+        {
+            await _repository.CancelInsurances(id, customerInsurances);
+            return Ok();
         }
     }
 }

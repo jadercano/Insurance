@@ -2,6 +2,7 @@ import { Http, Response } from '@angular/http';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Customer } from '../../domain/customer.domain';
+import { CustomerInsurance } from '../../domain/customerinsurance.domain';
 
 @Injectable()
 export class CustomerService {
@@ -15,6 +16,16 @@ export class CustomerService {
       .catch(this.handleError);
   }
 
+  get(customerId: string) {
+    console.log('get customer - customerId: ', customerId);
+    let result = this.http.get(`Customer/${customerId}`)
+      .toPromise()
+      .then(this.extractArrayData)
+      .catch(this.handleError);
+    console.log('get customer: ', result);
+    return result;
+  }
+
   save(customer: Customer): Promise<any> {
     let result = this.http
       .post('Customer', customer)
@@ -26,11 +37,30 @@ export class CustomerService {
   }
 
   delete(customerId: string): Promise<any> {
+    console.log('delete customer - customerId: ', customerId);
     let result = this.http
       .delete(`Customer/${customerId}`)
       .toPromise()
       .catch(this.handleError);
     console.log('delete customer: ', result);
+    return result;
+  }
+
+  saveInsurances(insurances: CustomerInsurance[]) {
+    let result = this.http
+      .post('Customer/saveInsurances', insurances)
+      .toPromise()
+      .catch(this.handleError);
+    console.log('add insurances: ', result);
+    return result;
+  }
+
+  cancelInsurances(insurances: CustomerInsurance[]) {
+    let result = this.http
+      .post('Customer/cancelInsurances', insurances)
+      .toPromise()
+      .catch(this.handleError);
+    console.log('delete insurances: ', result);
     return result;
   }
 
@@ -49,6 +79,7 @@ export class CustomerService {
   }
 
   private handleError(error: any): Promise<any> {
+    console.log(error);
     let body = error.json();
     console.log(body);
     return Promise.reject(body.error || error);

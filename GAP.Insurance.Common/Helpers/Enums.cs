@@ -21,4 +21,12 @@ namespace GAP.Insurance.Common.Helpers
         [Description("FATAL")]
         Fatal
     }
+
+    public enum CustomerInsuranceStatus
+    {
+        [Description("Active")]
+        Active,
+        [Description("Canceled")]
+        Canceled
+    }
 }

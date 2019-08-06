@@ -70,7 +70,10 @@
     <None Remove="ClientApp\dist\vendor.js.map" />
     <None Remove="ClientApp\src\app\api\api.ts" />
     <None Remove="ClientApp\src\app\api\services\insurance.service.ts" />
+    <None Remove="ClientApp\src\app\customerinsurance\customerinsurance.component.ts" />
+    <None Remove="ClientApp\src\app\customer\detail\customer.detail.component.ts" />
     <None Remove="ClientApp\src\app\domain\customer.domain.ts" />
+    <None Remove="ClientApp\src\app\domain\customerinsurance.domain.ts" />
     <None Remove="ClientApp\src\app\domain\insurance.domain.ts" />
     <None Remove="ClientApp\src\app\insurance\insurance.component.ts" />
   </ItemGroup>
@@ -78,7 +81,10 @@
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\app\api\api.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\api\services\insurance.service.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\customerinsurance\customerinsurance.component.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\customer\detail\customer.detail.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\domain\customer.domain.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\domain\customerinsurance.domain.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\domain\insurance.domain.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\insurance\insurance.component.ts" />
   </ItemGroup>

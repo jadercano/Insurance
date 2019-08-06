@@ -13,7 +13,9 @@ import { HomeComponent } from './home/home.component';
 import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { CustomerComponent } from './customer/customer.component';
+import { CustomerDetailComponent } from './customer/detail/customer.detail.component';
 import { InsuranceComponent } from './insurance/insurance.component';
+import { CustomerInsuranceComponent } from './customerinsurance/customerinsurance.component';
 
 // Services
 import { CustomRequestOptions } from './api/api';
@@ -30,6 +32,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CalendarModule } from 'primeng/calendar';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextareaModule } from 'primeng/inputtextarea';
+import { FieldsetModule } from 'primeng/fieldset';
 
 import { MessageService, ConfirmationService } from 'primeng/api';
 
@@ -40,8 +43,10 @@ import { MessageService, ConfirmationService } from 'primeng/api';
     HomeComponent,
     CounterComponent,
     FetchDataComponent,
-    CustomerComponent,
-    InsuranceComponent
+    CustomerComponent, 
+    CustomerDetailComponent,
+    InsuranceComponent,
+    CustomerInsuranceComponent
   ],
   imports: [
     BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
@@ -55,6 +60,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
       { path: 'fetch-data', component: FetchDataComponent },
       { path: 'customer', component: CustomerComponent },
       { path: 'insurance', component: InsuranceComponent },
+      { path: 'customer/:customerId', component: CustomerDetailComponent }
     ]),
     TableModule,
     InputTextModule,
@@ -64,7 +70,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
     ConfirmDialogModule,
     CalendarModule,
     DropdownModule,
-    InputTextareaModule
+    InputTextareaModule,
+    FieldsetModule
   ],
   providers: [
     { provide: RequestOptions, useClass: CustomRequestOptions },

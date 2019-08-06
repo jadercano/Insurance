@@ -23,6 +23,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace GAP.Insurance.API
 {
@@ -68,14 +69,27 @@ namespace GAP.Insurance.API
             //Mapping configuration is singleton too
             var mapperConfiguration = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMap<Insurance.Domain.Insurance, InsuranceTO>();
-                cfg.CreateMap<Insurance.Domain.Customer, CustomerTO>();
-                cfg.CreateMap<Insurance.Domain.CustomerInsurance, CustomerInsuranceTO>();
-                cfg.CreateMap<InsuranceTO, Insurance.Domain.Insurance>();
-                cfg.CreateMap<CustomerTO, Insurance.Domain.Customer>();
-                cfg.CreateMap<CustomerInsuranceTO, Insurance.Domain.CustomerInsurance>();
+                cfg.CreateMap<Insurance.Domain.Insurance, InsuranceTO>().ReverseMap();
+                cfg.CreateMap<Insurance.Domain.Customer, CustomerTO>()
+                    .ForMember(d => d.Insurances, opt => opt.MapFrom(src => src.CustomerInsurance))
+                    .ReverseMap();
+                cfg.CreateMap<Insurance.Domain.CustomerInsurance, CustomerInsuranceTO>()
+                    .ForMember(d => d.Insurance, opt => opt.MapFrom(src => src.Insurance))
+                    .ReverseMap();
             });
             services.AddSingleton(mapperConfiguration);
+
+            // Register the Swagger Generator
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new Info { Title = "Insurance.API", Version = "v1" });
+
+                // Set the comments path for the Swagger JSON and UI.
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -94,6 +108,18 @@ namespace GAP.Insurance.API
             }
 
             app.UseCors("CorsPolicy");
+
+            // Enable middleware to serve generated Swagger as a JSON endpoint.
+            app.UseSwagger();
+
+            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), 
+            // specifying the Swagger JSON endpoint.
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("./swagger/v1/swagger.json", "Insurance.API V1");
+                c.RoutePrefix = string.Empty;
+            });
+
             app.UseHttpsRedirection();
             app.UseMvc();
         }

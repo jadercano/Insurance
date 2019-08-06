@@ -35,24 +35,28 @@ namespace GAP.Insurance.Common.Attributes
         /// <param name="context"></param>
         public override void OnException(ExceptionContext context)
         {
+            var apiError = new APIError();
+            int statusCode = (int)HttpStatusCode.InternalServerError;
+            CustomException exception = null;
+
             //Allows to write the error in the application log
             _logger.WriteError(context.Exception.Message, context.Exception);
 
-            var exception = context.Exception as CustomException;
+            var controllerName = context.RouteData.Values["controller"];
+            var actionName = context.RouteData.Values["action"];
+            _logger.WriteLog(Helpers.LogCategory.Debug, "ERROR_UnhandledException", actionName, controllerName);
 
-            if (exception == null)
+            if ((context.Exception as CustomException) == null)
             {
-                //Unhandled exception
-                var controllerName = context.RouteData.Values["controller"];
-                var actionName = context.RouteData.Values["action"];                
-                _logger.WriteLog(Helpers.LogCategory.Debug, "ERROR_UnhandledException", actionName, controllerName);
-
-                string userMessage = _localizer.GetMessage("ERROR_UnhandledExceptionMessage");
-                exception = new CustomException(userMessage, context.Exception);
+                exception = ProcessUnmanagedException(context);
             }
 
-            var apiError = new APIError();
-            int statusCode = (int)HttpStatusCode.InternalServerError;
+            if (context.Exception is ArgumentNullException)
+            {
+                statusCode = (int)HttpStatusCode.BadRequest;
+                exception = ProcessArgumentNullException(context);
+            }
+
             apiError.StatusCode = statusCode;
             apiError.Error = exception.Message;
             apiError.Detail = (exception.InnerException != null) ? exception.InnerException.Message : string.Empty;
@@ -60,6 +64,17 @@ namespace GAP.Insurance.Common.Attributes
             context.ExceptionHandled = true;
             context.HttpContext.Response.StatusCode = statusCode;
             context.Result = new JsonResult(apiError);
+        }
+
+        private CustomException ProcessUnmanagedException(ExceptionContext context)
+        {
+            string userMessage = _localizer.GetMessage("ERROR_UnhandledExceptionMessage");
+            return new CustomException(userMessage, context.Exception);
+        }
+
+        private CustomException ProcessArgumentNullException(ExceptionContext context)
+        {
+            return new CustomException(context.Exception.Message, context.Exception);
         }
     }
 }

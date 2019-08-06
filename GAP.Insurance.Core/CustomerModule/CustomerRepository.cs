@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GAP.Insurance.Common.Exceptions;
+using GAP.Insurance.Common.Helpers;
 using GAP.Insurance.Common.Infrastructure;
 using GAP.Insurance.Domain;
 using GAP.Insurance.TO;
@@ -74,12 +75,16 @@ namespace GAP.Insurance.Core.CustomerModule
             CustomerTO customerTO = null;
             using (var context = new DBInsuranceContext(_contextOptions))
             {
-                var customer = await context.Customer.Where(s => s.CustomerId == id).FirstOrDefaultAsync();
+                var customer = await context.Customer.Where(c => c.CustomerId == id)
+                    .Include(c => c.CustomerInsurance).FirstOrDefaultAsync();
 
-                if (customer != null)
+                if (customer == null)
                 {
-                    customerTO = _mapper.Map<CustomerTO>(customer);
+                    return null;
                 }
+
+                customerTO = _mapper.Map<CustomerTO>(customer);
+                customerTO.Insurances = _mapper.Map<List<CustomerInsuranceTO>>(customer.CustomerInsurance);
             }
 
             return customerTO;
@@ -101,13 +106,7 @@ namespace GAP.Insurance.Core.CustomerModule
                 }
                 else
                 {
-                    ValidateId(customerTO.CustomerId);
-                    var customer = await context.Customer.Where(s => s.CustomerId == customerTO.CustomerId).FirstOrDefaultAsync();
-
-                    if (customer == null)
-                    {
-                        throw new CustomException(_localizer.GetMessage("ERROR_EntityNotFound", customerTO.CustomerId));
-                    }
+                    var customer = await ValidateCustomer(context, customerTO.CustomerId);
 
                     customer.Name = customerTO.Name;
                     customer.Email = customerTO.Email;
@@ -118,26 +117,67 @@ namespace GAP.Insurance.Core.CustomerModule
             return customerTO;
         }
 
-        /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.AssignInsurances(List{InsuranceTO})"/>
-        public async Task AssignInsurances(List<InsuranceTO> insurancesTO)
+        /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.SaveInsurances(Guid, List{CustomerInsuranceTO})(List{InsuranceTO})"/>
+        public async Task SaveInsurances(Guid id, List<CustomerInsuranceTO> insurancesTO)
         {
             if (insurancesTO == null)
-                throw new ArgumentNullException("insuranceTO");
+                throw new ArgumentNullException(nameof(insurancesTO));
 
             using (var context = new DBInsuranceContext(_contextOptions))
             {
+                var customer = await ValidateCustomer(context, id);
+
+                foreach (var insuranceTO in insurancesTO)
+                {
+                    var customerInsurance = await context.CustomerInsurance.FirstOrDefaultAsync(ci => ci.CustomerId == customer.CustomerId
+                        && ci.InsuranceId == insuranceTO.Insurance.InsuranceId
+                        && ci.StartDate == insuranceTO.StartDate);
+
+                    if (customerInsurance == null)
+                    {
+                        customerInsurance = new CustomerInsurance
+                        {
+                            CustomerId = id,
+                            InsuranceId = insuranceTO.Insurance.InsuranceId,
+                            StartDate = insuranceTO.StartDate,
+                            EndDate = insuranceTO.EndDate,
+                            Status = CustomerInsuranceStatus.Active.ToString()
+                        };
+                        context.CustomerInsurance.Add(customerInsurance);
+                    }
+
+                    customerInsurance.EndDate = insuranceTO.EndDate;
+                    customerInsurance.Status = CustomerInsuranceStatus.Active.ToString();
+                }
+
                 await context.SaveChangesAsync();
             }
         }
 
-        /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.CancelInsurances(List{InsuranceTO})"/>
-        public async Task CancelInsurances(List<InsuranceTO> insurancesTO)
+        /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.CancelInsurances(Guid id, List{CustomerInsuranceTO})(List{InsuranceTO})"/>
+        public async Task CancelInsurances(Guid id, List<CustomerInsuranceTO> insurancesTO)
         {
             if (insurancesTO == null)
-                throw new ArgumentNullException("insuranceTO");
+                throw new ArgumentNullException(nameof(insurancesTO));
 
             using (var context = new DBInsuranceContext(_contextOptions))
             {
+                var customer = await ValidateCustomer(context, id);
+
+                foreach (var insuranceTO in insurancesTO)
+                {
+                    var customerInsurance = await context.CustomerInsurance.FirstOrDefaultAsync(ci => ci.CustomerId == customer.CustomerId
+                        && ci.InsuranceId == insuranceTO.Insurance.InsuranceId
+                        && ci.StartDate == insuranceTO.StartDate);
+
+                    if (customerInsurance == null)
+                    {
+                        continue;
+                    }
+
+                    customerInsurance.Status = CustomerInsuranceStatus.Canceled.ToString();
+                }
+                
                 await context.SaveChangesAsync();
             }
         }
@@ -148,6 +188,19 @@ namespace GAP.Insurance.Core.CustomerModule
             {
                 throw new CustomException(_localizer.GetMessage("ERROR_EntityNotFound", id));
             }
+        }
+
+        private async Task<Customer> ValidateCustomer(DBInsuranceContext context, Guid id)
+        {
+            ValidateId(id);
+            var customer = await context.Customer.Where(s => s.CustomerId == id).FirstOrDefaultAsync();
+
+            if (customer == null)
+            {
+                throw new CustomException(_localizer.GetMessage("ERROR_EntityNotFound", id));
+            }
+
+            return customer;
         }
 
         private void Validate(CustomerTO customerTO)
@@ -164,7 +217,7 @@ namespace GAP.Insurance.Core.CustomerModule
             }
             else if (customerTO.Name.Length > 50)
             {
-                throw new InvalidOperationException(_localizer.GetMessage("Customer_Validate_Name"));
+                throw new CustomException(_localizer.GetMessage("Customer_Validate_Name"));
             }
 
             //Validate email

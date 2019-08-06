@@ -1,0 +1,21 @@
+<div class="ui-g ui-fluid" *ngIf="customer">
+  <div class="ui-g-12">
+    <div class="ui-g-4">
+      <label for="name">Name</label>
+    </div>
+    <div class="ui-g-8">
+      <input pInputText id="name" [(ngModel)]="customer.name" readonly="readonly" />
+    </div>
+  </div>
+  <div class="ui-g-12">
+    <div class="ui-g-4">
+      <label for="email">E-mail</label>
+    </div>
+    <div class="ui-g-8">
+      <input pInputText id="email" type="email" [(ngModel)]="customer.email" readonly="readonly" />
+    </div>
+  </div>
+</div>
+
+<app-customer-insurance [customerId]="customer.customerId" id="customer-insurance-list">
+</app-customer-insurance>

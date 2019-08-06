@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Customer } from '../domain/customer.domain';
 import { CustomerService } from '../api/services/customer.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-customer',
@@ -10,6 +11,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 export class CustomerComponent implements OnInit {
 
   displayDialog: boolean;
+
+  displayDetail: boolean = false;
 
   customer: Customer = {} as Customer;
 
@@ -21,7 +24,7 @@ export class CustomerComponent implements OnInit {
 
   cols: any[];
 
-  constructor(private customerService: CustomerService, private messageService: MessageService, private confirmationService: ConfirmationService) { }
+  constructor(private customerService: CustomerService, private messageService: MessageService, private confirmationService: ConfirmationService, private router: Router) { }
 
   ngOnInit() {
     this.loadCustomers();
@@ -96,5 +99,11 @@ export class CustomerComponent implements OnInit {
       customer[prop] = c[prop];
     }
     return customer as Customer;
+  }
+
+  showDetail(customer: Customer) {
+    this.newCustomer = false;
+    this.customer = this.cloneCustomer(customer);
+    this.displayDetail = true;
   }
 }
