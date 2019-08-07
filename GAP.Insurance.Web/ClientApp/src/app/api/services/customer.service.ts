@@ -1,4 +1,4 @@
-import { Http, Response } from '@angular/http';
+import { Http, Response, Headers, RequestOptions } from '@angular/http';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Customer } from '../../domain/customer.domain';
@@ -46,18 +46,23 @@ export class CustomerService {
     return result;
   }
 
-  saveInsurances(insurances: CustomerInsurance[]) {
+  saveInsurances(id: string, insurances: CustomerInsurance[]) {
+    let contentHeaders = new Headers();
+    contentHeaders.append('Accept', 'application/json');
+    contentHeaders.append('Content-Type', 'application/json');
+    let options = new RequestOptions({ headers: contentHeaders })
     let result = this.http
-      .post('Customer/saveInsurances', insurances)
+      .post(`Customer/saveInsurances/${id}`, insurances, options)
       .toPromise()
       .catch(this.handleError);
-    console.log('add insurances: ', result);
+    console.log('add insurances: ', insurances);
     return result;
   }
 
-  cancelInsurances(insurances: CustomerInsurance[]) {
+  cancelInsurances(id: string, insurances: CustomerInsurance[]) {
+    console.log('delete insurances: ', insurances);
     let result = this.http
-      .post('Customer/cancelInsurances', insurances)
+      .post(`Customer/cancelInsurances/${id}`, insurances)
       .toPromise()
       .catch(this.handleError);
     console.log('delete insurances: ', result);

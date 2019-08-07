@@ -1,32 +1,62 @@
-<p-table [columns]="cols" [value]="insurances" [(selection)]="selectedInsurance" (onRowSelect)="onRowSelect($event)" [paginator]="true" [rows]="10" [responsive]="true">
+<p-table [value]="insurances" [(selection)]="selectedInsurances" [paginator]="true" [rows]="10" [responsive]="true">
   <ng-template pTemplate="caption">
     List of Insurances
   </ng-template>
   <ng-template pTemplate="header" let-columns>
     <tr>
-      <th *ngFor="let col of columns" [pSortableColumn]="col.field">
-        {{col.header}}
-        <p-sortIcon [field]="col.field"></p-sortIcon>
+      <th style="width: 3em">
+        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+      </th>
+      <th>
+        Insurance
+        <p-sortIcon field="insurance.name"></p-sortIcon>
+      </th>
+      <th>
+        Start date
+        <p-sortIcon field="startDate"></p-sortIcon>
+      </th>
+      <th>
+        End date
+        <p-sortIcon field="endDate"></p-sortIcon>
       </th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr [pSelectableRow]="rowData">
-      <td *ngFor="let col of columns">
-        {{rowData[col.field]}}
+      <td>
+        <p-tableCheckbox [value]="rowData"></p-tableCheckbox>
+      </td>
+      <td>
+        {{rowData?.insurance?.name}}
+      </td>
+      <td>
+        {{rowData?.startDate | date: 'MM/dd/yyyy'}}
+      </td>
+      <td>
+        {{rowData?.endDate | date: 'MM/dd/yyyy'}}
       </td>
     </tr>
   </ng-template>
   <ng-template pTemplate="summary" let-rowData>
     <div style="text-align:left">
-      <button type="button" pButton icon="fa fa-plus" (click)="showDialogToAdd()" label="Add"></button>&nbsp;
-      <button pButton icon="fa fa-edit" (click)="edit(rowData)"></button>&nbsp;
+      <button type="button" pButton icon="fa fa-plus" (click)="showDialogToAdd()"></button>&nbsp;
       <button pButton icon="fa fa-trash" (click)="delete(rowData)"></button>
     </div>
   </ng-template>
 </p-table>
 
-<p-dialog header="Customer Insurance Details" [(visible)]="displayDialog" [responsive]="true" showEffect="fade" [modal]="true" [style]="{width: '600px', height: '700px'}">
+<div class="ui-g ui-fluid">
+  <div class="ui-g-12">
+    <div class="ui-g-2 ui-md-offset-4">
+      <button type="button" pButton icon="fa fa-save" (click)="save()" [disabled]="insurances.length <= 0" class="float-left" label="Save"></button>
+    </div>
+    <div class="ui-g-2 text-left">
+      <button type="button" pButton icon="fa fa-window-close" (click)="cancel()" label="Cancel" class="ui-button-secondary float-right"></button>
+    </div>
+  </div>
+</div>
+
+<p-dialog header="Customer Insurance Details" [(visible)]="displayDialog" [contentStyle]="{'overflow':'visible'}" [responsive]="true" showEffect="fade" [modal]="true" [style]="{width: '600px', height: '700px'}">
   <div class="ui-g ui-fluid" *ngIf="customerInsurance">
     <div class="ui-g-12" *ngIf="newInsurance">
       <div class="ui-g-4">
@@ -55,7 +85,7 @@
   </div>
   <p-footer>
     <div class="ui-dialog-buttonpane ui-helper-clearfix">
-      <button type="submit" pButton icon="fa fa-check" (click)="save()" label="Save"></button>
+      <button type="submit" pButton icon="fa fa-plus" (click)="add()" label="Add"></button>
     </div>
   </p-footer>
 </p-dialog>

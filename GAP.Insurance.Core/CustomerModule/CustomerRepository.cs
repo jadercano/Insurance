@@ -69,22 +69,17 @@ namespace GAP.Insurance.Core.CustomerModule
         /// <see cref="GAP.Insurance.Core.CustomerModule.ICustomerRepository.GetById(string)"/>
         public async Task<CustomerTO> GetById(Guid id)
         {
-            //Validate argument
-            ValidateId(id);
-
             CustomerTO customerTO = null;
             using (var context = new DBInsuranceContext(_contextOptions))
             {
-                var customer = await context.Customer.Where(c => c.CustomerId == id)
-                    .Include(c => c.CustomerInsurance).FirstOrDefaultAsync();
+                var customer = await ValidateCustomer(context, id);
 
-                if (customer == null)
-                {
-                    return null;
-                }
-
+                var customerInsurances = await context.CustomerInsurance
+                    .Include(c => c.Insurance)
+                    .Where(c => c.CustomerId == id && c.Status != CustomerInsuranceStatus.Canceled.ToString()).ToListAsync();
+                
                 customerTO = _mapper.Map<CustomerTO>(customer);
-                customerTO.Insurances = _mapper.Map<List<CustomerInsuranceTO>>(customer.CustomerInsurance);
+                customerTO.Insurances = _mapper.Map<List<CustomerInsuranceTO>>(customerInsurances);
             }
 
             return customerTO;

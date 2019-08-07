@@ -75,6 +75,7 @@
     <None Remove="ClientApp\src\app\domain\customer.domain.ts" />
     <None Remove="ClientApp\src\app\domain\customerinsurance.domain.ts" />
     <None Remove="ClientApp\src\app\domain\insurance.domain.ts" />
+    <None Remove="ClientApp\src\app\home\refresh.component.ts" />
     <None Remove="ClientApp\src\app\insurance\insurance.component.ts" />
   </ItemGroup>
 
@@ -86,6 +87,7 @@
     <TypeScriptCompile Include="ClientApp\src\app\domain\customer.domain.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\domain\customerinsurance.domain.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\domain\insurance.domain.ts" />
+    <TypeScriptCompile Include="ClientApp\src\app\home\refresh.component.ts" />
     <TypeScriptCompile Include="ClientApp\src\app\insurance\insurance.component.ts" />
   </ItemGroup>
 

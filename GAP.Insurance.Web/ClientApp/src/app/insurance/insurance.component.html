@@ -8,7 +8,7 @@
   </ng-template>
   <ng-template pTemplate="header" let-columns>
     <tr>
-      <th *ngFor="let col of columns" [pSortableColumn]="col.field"> 
+      <th *ngFor="let col of columns" [pSortableColumn]="col.field" [class]="col.class"> 
         {{col.header}}
         <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
@@ -17,8 +17,14 @@
   </ng-template>
   <ng-template pTemplate="body" let-rowData let-columns="columns">
     <tr [pSelectableRow]="rowData">
-      <td *ngFor="let col of columns">
-        {{rowData[col.field]}}
+      <td *ngFor="let col of columns" [class]="col.class">
+        <div *ngIf="col.format;then format_content else normal_content"></div>
+        <ng-template #format_content>
+          {{rowData[col.field] | date: col.format}}
+        </ng-template>
+        <ng-template #normal_content>
+          {{rowData[col.field]}}
+        </ng-template>
       </td>
       <td>
         <button pButton icon="fa fa-edit" (click)="edit(rowData)"></button>&nbsp;

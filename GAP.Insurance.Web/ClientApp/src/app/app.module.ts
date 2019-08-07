@@ -1,8 +1,8 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { HttpModule, RequestOptions } from '@angular/http';
 import { HttpClientModule } from '@angular/common/http';
@@ -10,6 +10,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { AppComponent } from './app.component';
 import { NavMenuComponent } from './nav-menu/nav-menu.component';
 import { HomeComponent } from './home/home.component';
+import { RefreshComponent } from './home/refresh.component';
 import { CounterComponent } from './counter/counter.component';
 import { FetchDataComponent } from './fetch-data/fetch-data.component';
 import { CustomerComponent } from './customer/customer.component';
@@ -41,6 +42,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
     AppComponent,
     NavMenuComponent,
     HomeComponent,
+    RefreshComponent,
     CounterComponent,
     FetchDataComponent,
     CustomerComponent, 
@@ -54,10 +56,12 @@ import { MessageService, ConfirmationService } from 'primeng/api';
     HttpModule,
     HttpClientModule,
     FormsModule,
+    ReactiveFormsModule,
     RouterModule.forRoot([
       { path: '', component: HomeComponent, pathMatch: 'full' },
       { path: 'counter', component: CounterComponent },
       { path: 'fetch-data', component: FetchDataComponent },
+      { path: 'refresh', component: RefreshComponent },
       { path: 'customer', component: CustomerComponent },
       { path: 'insurance', component: InsuranceComponent },
       { path: 'customer/:customerId', component: CustomerDetailComponent }

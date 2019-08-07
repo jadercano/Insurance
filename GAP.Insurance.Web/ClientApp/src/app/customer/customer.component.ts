@@ -24,9 +24,15 @@ export class CustomerComponent implements OnInit {
 
   cols: any[];
 
-  constructor(private customerService: CustomerService, private messageService: MessageService, private confirmationService: ConfirmationService, private router: Router) { }
+  constructor(
+    private customerService: CustomerService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
+
     this.loadCustomers();
 
     this.cols = [

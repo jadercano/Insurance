@@ -5,9 +5,10 @@ import { CustomerInsurance } from '../domain/customerinsurance.domain';
 import { CustomerService } from '../api/services/customer.service';
 import { InsuranceService } from '../api/services/insurance.service';
 import { MessageService, ConfirmationService, SelectItem } from 'primeng/api';
+import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-customer-customerInsurance',
+  selector: 'app-customer-insurance',
   templateUrl: './customerinsurance.component.html'
 })
 export class CustomerInsuranceComponent implements OnInit {
@@ -26,26 +27,28 @@ export class CustomerInsuranceComponent implements OnInit {
 
   newInsurance: boolean;
 
-  insurances: CustomerInsurance[];
+  insurances: CustomerInsurance[] = [];
 
-  cols: any[];
-
-  constructor(private insuranceService: InsuranceService, private customerService: CustomerService, private messageService: MessageService, private confirmationService: ConfirmationService) { }
+  constructor(
+    private insuranceService: InsuranceService,
+    private customerService: CustomerService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.getDetail();
 
     this.loadInsurances();
-
-    this.cols = [
-      { field: 'customerInsurance.name', header: 'Name' },
-      { field: 'startDate', header: 'Start date' },
-      { field: 'endDate', header: 'End date' }
-    ];
   }
 
   getDetail() {
-    this.customerService.get(this.customerId).then(customer => this.customer = customer);
+    this.customerService.get(this.customerId).then(customer => {
+      this.customer = customer;
+      this.insurances = customer.insurances;
+      console.log(this.insurances);
+    });
   }
 
   loadInsurances() {
@@ -59,11 +62,11 @@ export class CustomerInsuranceComponent implements OnInit {
   }
 
   add() {
-    this.insurances.push(this.customerInsurance)
+    this.insurances.push(this.customerInsurance);
   }
 
   save() {
-    this.customerService.saveInsurances(this.selectedInsurances)
+    this.customerService.saveInsurances(this.customerId, this.insurances)
       .then(data => {
         this.customerInsurance = null;
         this.displayDialog = false;
@@ -73,6 +76,11 @@ export class CustomerInsuranceComponent implements OnInit {
       .catch((error) => {
         this.messageService.add({ severity: 'error', summary: 'Error Message', detail: error });
       });
+  }
+
+  cancel() {
+    this.router.navigateByUrl('/refresh', { skipLocationChange: true }).then(() =>
+      this.router.navigate(["/customer"]));
   }
 
   edit(customerInsurance: CustomerInsurance) {
@@ -93,7 +101,7 @@ export class CustomerInsuranceComponent implements OnInit {
   }
 
   deleteConfirmed() {
-    this.customerService.deleteInsurances(this.selectedInsurances)
+    this.customerService.cancelInsurances(this.customerId, this.selectedInsurances)
       .then(() => {
         this.customerInsurance = null;
         this.displayDialog = false;

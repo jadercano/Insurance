@@ -31,13 +31,13 @@ export class InsuranceComponent implements OnInit {
     this.loadInsurances();
 
     this.cols = [
-      { field: 'name', header: 'Name' },
-      { field: 'startDate', header: 'Start date' },
-      { field: 'endDate', header: 'End date' },
-      { field: 'coverageType', header: 'Coverage type' },
-      { field: 'coverage', header: 'Coverage' },
-      { field: 'cost', header: 'Cost' },
-      { field: 'riskType', header: 'Risk type' }
+      { field: 'name', header: 'Name', class: '' },
+      { field: 'startDate', header: 'Start date', class: 'ui-p-1', format: 'MM/dd/yyyy' },
+      { field: 'endDate', header: 'End date', class: 'ui-p-2', format: 'MM/dd/yyyy'},
+      { field: 'coverageType', header: 'Coverage type', class: 'ui-p-3' },
+      { field: 'coverage', header: 'Coverage', class: 'ui-p-4' },
+      { field: 'cost', header: 'Cost', class: 'ui-p-5'},
+      { field: 'riskType', header: 'Risk type', class: 'ui-p-6' }
     ];
 
     this.coverageTypes = [
@@ -83,6 +83,8 @@ export class InsuranceComponent implements OnInit {
   edit(insurance: Insurance) {
     this.newInsurance = false;
     this.insurance = this.cloneInsurance(insurance);
+    this.insurance.startDate = new Date(this.insurance.startDate);
+    this.insurance.endDate = new Date(this.insurance.endDate);
     this.displayDialog = true;
   }
 
