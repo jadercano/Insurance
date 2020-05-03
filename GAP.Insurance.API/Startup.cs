@@ -23,6 +23,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace GAP.Insurance.API
@@ -40,16 +41,19 @@ namespace GAP.Insurance.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc(options =>
-            {
+                            {
+                                options.EnableEndpointRouting = false;
                 options.Filters.Add(typeof(CustomActionFilterAttribute));
                 options.Filters.Add(typeof(CustomExceptionFilterAttribute));
-            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             // Enable CORS
+            var allowedOrigins = new List<string>();
+            Configuration.GetSection("AllowedOrigins").Bind(allowedOrigins);
             services.AddCors(options =>
             {
                 options.AddPolicy("CorsPolicy",
-                    builder => builder.AllowAnyOrigin()
+                    builder => builder.WithOrigins(allowedOrigins.ToArray())
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials());
@@ -82,7 +86,7 @@ namespace GAP.Insurance.API
             // Register the Swagger Generator
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "Insurance.API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Insurance.API", Version = "v1" });
 
                 // Set the comments path for the Swagger JSON and UI.
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";

@@ -20,7 +20,7 @@ namespace GAP.Insurance.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc(options => { options.EnableEndpointRouting = false; }).SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -48,11 +48,11 @@ namespace GAP.Insurance.Web
             app.UseSpaStaticFiles();
 
             app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
-            });
+                       {
+                           routes.MapRoute(
+                                           name: "default",
+                                           template: "{controller}/{action=Index}/{id?}");
+                       });
 
             app.UseSpa(spa =>
             {
